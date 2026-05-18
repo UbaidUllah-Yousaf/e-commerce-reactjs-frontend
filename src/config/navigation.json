@@ -1,0 +1,124 @@
+{
+  "announcement": "Complimentary shipping on qualifying orders · Easy returns within 14 days",
+  "listingBanners": [
+    {
+      "id": "shipping-returns",
+      "variant": "stripe",
+      "headline": "Complimentary shipping on qualifying orders",
+      "subline": "Easy returns within 14 days — see details at checkout."
+    },
+    {
+      "id": "seasonal",
+      "variant": "promo",
+      "headline": "New arrivals weekly — refine with filters or jump into a collection.",
+      "href": "/",
+      "ctaLabel": "Browse all"
+    },
+    {
+      "id": "account",
+      "variant": "minimal",
+      "headline": "Save addresses & track orders from your account.",
+      "href": "/account",
+      "ctaLabel": "My account"
+    }
+  ],
+  "primaryNav": [
+    {
+      "type": "collections",
+      "id": "nav-collections",
+      "label": "Collections"
+    },
+    {
+      "type": "mega",
+      "id": "men",
+      "label": "Men",
+      "sections": [
+        {
+          "heading": "Featured",
+          "items": [
+            { "label": "New arrivals", "href": "/" },
+            { "label": "Best sellers", "href": "/" },
+            { "label": "Outerwear", "collectionId": 1 }
+          ]
+        },
+        {
+          "heading": "Categories",
+          "items": [
+            { "label": "Tops", "href": "/" },
+            { "label": "Bottoms", "href": "/" },
+            { "label": "Footwear", "href": "/" }
+          ]
+        },
+        {
+          "heading": "Edits",
+          "items": [
+            { "label": "Weekend", "href": "/" },
+            { "label": "Essentials", "collectionId": 1 },
+            { "label": "Sale", "href": "/" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "mega",
+      "id": "women",
+      "label": "Women",
+      "sections": [
+        {
+          "heading": "Featured",
+          "items": [
+            { "label": "New arrivals", "href": "/" },
+            { "label": "Dresses", "collectionId": 1 },
+            { "label": "Knitwear", "href": "/" }
+          ]
+        },
+        {
+          "heading": "Categories",
+          "items": [
+            { "label": "Tops", "href": "/" },
+            { "label": "Bottoms", "href": "/" },
+            { "label": "Accessories", "href": "/" }
+          ]
+        },
+        {
+          "heading": "Edits",
+          "items": [
+            { "label": "Office", "href": "/" },
+            { "label": "Evening", "href": "/" },
+            { "label": "Loungewear", "collectionId": 1 }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "mega",
+      "id": "kids",
+      "label": "Kids",
+      "sections": [
+        {
+          "heading": "Shop",
+          "items": [
+            { "label": "Baby", "href": "/" },
+            { "label": "Boys", "href": "/" },
+            { "label": "Girls", "href": "/" }
+          ]
+        },
+        {
+          "heading": "Season",
+          "items": [
+            { "label": "Outerwear", "collectionId": 1 },
+            { "label": "Essentials", "href": "/" },
+            { "label": "Shoes", "href": "/" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "link",
+      "id": "shop-all",
+      "label": "Shop all",
+      "href": "/products",
+      "variant": "text"
+    }
+  ]
+}

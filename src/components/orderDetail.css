@@ -1,0 +1,677 @@
+/* Order detail — sans-first type (avoids serif/body clash from global h1–h3) */
+
+.od-page {
+  max-width: 1180px;
+  font-family: var(--ella-font-body);
+  font-feature-settings: 'liga' 1, 'kern' 1;
+}
+
+.od-page h1,
+.od-page h2,
+.od-page h3 {
+  font-family: var(--ella-font-body);
+}
+
+.od-page .ant-tag,
+.od-page .ant-btn,
+.od-page .ant-breadcrumb,
+.od-page .ant-breadcrumb a {
+  font-family: inherit;
+}
+
+.od-breadcrumb {
+  margin-bottom: 1.5rem;
+}
+
+.od-breadcrumb a {
+  color: var(--ella-muted);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.od-breadcrumb a:hover {
+  color: var(--ella-text);
+}
+
+.od-breadcrumb .ant-breadcrumb-link span {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ella-text);
+}
+
+.od-breadcrumb .ant-breadcrumb-separator {
+  color: var(--ella-muted);
+  margin: 0 0.5rem;
+  opacity: 0.55;
+}
+
+.od-hero {
+  margin-bottom: clamp(1.75rem, 4vw, 2.75rem);
+  padding-bottom: clamp(1.5rem, 3vw, 2rem);
+  border-bottom: 1px solid var(--ella-border);
+}
+
+.od-eyebrow {
+  margin: 0 0 0.65rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ella-muted);
+}
+
+.od-hero-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.od-title {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+  font-size: clamp(1.65rem, 3.2vw, 2.1rem);
+  letter-spacing: -0.03em;
+  color: var(--ella-text);
+  line-height: 1.2;
+}
+
+.od-meta {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ella-muted);
+}
+
+.od-contact {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--ella-text);
+  opacity: 0.85;
+}
+
+.od-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Hero status strip: identical pill box for payment + fulfillment */
+.od-tags .ant-tag {
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  border-radius: 999px !important;
+  padding: 5px 14px !important;
+  min-height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  border: 1px solid var(--ella-border) !important;
+}
+
+.od-tags .ant-tag.od-tag--success {
+  /* PAID — pale shell, same forest text as fulfilled badge (reference parity) */
+  color: #14532a !important;
+  background: #e8f3ec !important;
+  border-color: #c5e4d1 !important;
+}
+
+.od-tags .ant-tag.od-tag--warn {
+  color: #664d03 !important;
+  background: #fff3cd !important;
+  border-color: #ffecb5 !important;
+}
+
+.od-tags .ant-tag.od-tag--neutral {
+  color: var(--ella-muted) !important;
+  background: var(--ella-bg) !important;
+  text-transform: none !important;
+  letter-spacing: 0.04em !important;
+  font-weight: 500 !important;
+}
+
+/* Shopify Admin–aligned fulfillment badges (Polaris-style tones) */
+.od-ff-badge {
+  margin: 0 !important;
+  border-radius: 999px !important;
+  padding: 5px 12px !important;
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  line-height: 1.35 !important;
+  border: none !important;
+}
+
+.od-ff-badge--fulfilled {
+  /* Fulfilled — slightly deeper mint than PAID, matching reference */
+  color: #14532a !important;
+  background: #c8efd9 !important;
+  border: 1px solid #9fd4b3 !important;
+}
+
+.od-ff-badge--unfulfilled {
+  color: #616161 !important;
+  background: #ebebeb !important;
+}
+
+.od-ff-badge--open {
+  color: #084e8a !important;
+  background: #e3f1ff !important;
+}
+
+.od-ff-badge--in_transit {
+  color: #1e3a5f !important;
+  background: #e0e9ff !important;
+}
+
+.od-ff-badge--partial {
+  color: #5c3d00 !important;
+  background: #ffeb9c !important;
+}
+
+.od-ff-badge--scheduled {
+  color: #1e4fad !important;
+  background: #e0e9ff !important;
+}
+
+.od-ff-badge--on_hold {
+  color: #5c3d1f !important;
+  background: #f5e8d7 !important;
+}
+
+.od-ff-badge--cancelled {
+  color: #4a4d51 !important;
+  background: #e4e5e7 !important;
+}
+
+.od-ff-badge--critical {
+  color: #6b1810 !important;
+  background: #fed3d1 !important;
+}
+
+.od-ff-badge--default {
+  color: var(--ella-text) !important;
+  background: var(--ella-bg) !important;
+  border: 1px solid var(--ella-border) !important;
+}
+
+.od-tags .ant-tag.od-ff-badge {
+  /* Same box as financial tags; title case for fulfillment labels */
+  padding: 5px 14px !important;
+  min-height: 28px !important;
+  font-size: 0.6875rem !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+}
+
+/* Line-item fulfillment — same badge system, tighter for list density */
+.od-line-item__status {
+  margin-top: 0.45rem;
+}
+
+.od-line-item__ff.ant-tag {
+  margin: 0 !important;
+  padding: 4px 10px !important;
+  font-size: 0.625rem !important;
+  line-height: 1.35 !important;
+}
+
+.od-fulfillment-card__head .ant-tag.od-ff-badge {
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.od-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .od-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .od-aside {
+    order: -1;
+  }
+}
+
+.od-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 2.5vw, 1.75rem);
+}
+
+.od-aside {
+  position: sticky;
+  top: 104px;
+}
+
+@media (max-width: 900px) {
+  .od-aside {
+    position: static;
+  }
+}
+
+.od-section {
+  background: var(--ella-surface);
+  border: 1px solid var(--ella-border);
+  padding: clamp(1.15rem, 2.5vw, 1.5rem) clamp(1.15rem, 2.5vw, 1.65rem);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 50%) inset,
+    0 14px 40px rgb(35 35 35 / 4%);
+}
+
+.od-section-title {
+  margin: 0 0 1rem;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  letter-spacing: -0.015em;
+  color: var(--ella-text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.od-section-title__icon {
+  font-size: 1rem;
+  opacity: 0.55;
+}
+
+.od-line-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.od-line-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1rem 1.25rem;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--ella-border);
+}
+
+.od-line-item:first-child {
+  padding-top: 0;
+}
+
+.od-line-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.od-line-item__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.od-line-item__thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 0;
+  border: 1px solid var(--ella-border);
+  background: linear-gradient(145deg, var(--ella-bg) 0%, rgb(255 255 255 / 90%) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ella-muted);
+  flex-shrink: 0;
+}
+
+.od-line-item__thumb--photo {
+  padding: 0;
+  overflow: hidden;
+  background: #f1f5f9;
+}
+
+.od-line-item__thumb--photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.od-line-item__body {
+  min-width: 0;
+  flex: 1;
+}
+
+.od-line-item__title {
+  margin: 0 0 0.2rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ella-text);
+  line-height: 1.35;
+}
+
+.od-line-item__meta {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ella-muted);
+  line-height: 1.45;
+}
+
+.od-line-item__end {
+  text-align: right;
+  flex-shrink: 0;
+  min-width: 7.5rem;
+}
+
+.od-line-item__qty {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ella-muted);
+  margin-bottom: 0.35rem;
+}
+
+.od-line-item__unit {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--ella-muted);
+}
+
+.od-line-item__total {
+  display: block;
+  margin-top: 0.2rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ella-text);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 600px) {
+  .od-line-item__thumb {
+    width: 48px;
+    height: 48px;
+  }
+
+  .od-line-item__end {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 0.5rem 1rem;
+    min-width: 0;
+  }
+
+  .od-line-item__qty {
+    margin-bottom: 0;
+  }
+}
+
+.od-address-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.od-address-card {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--ella-border);
+  background: var(--ella-bg);
+  min-height: 100%;
+}
+
+.od-address-card__label {
+  margin: 0 0 0.75rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ella-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.od-address-card__name {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ella-text);
+}
+
+.od-address-card__line {
+  margin: 0 0 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ella-text);
+}
+
+.od-address-card__line--muted {
+  color: var(--ella-muted);
+  font-size: 0.8125rem;
+}
+
+.od-address-card__country {
+  margin: 0.75rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ella-muted);
+}
+
+.od-fulfillment-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.od-fulfillment-card {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--ella-border);
+  background: var(--ella-bg);
+}
+
+.od-fulfillment-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.od-fulfillment-card__brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.od-fulfillment-card__logo-wrap {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--ella-border);
+  background: var(--ella-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.od-fulfillment-card__logo {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.od-fulfillment-card__titles {
+  min-width: 0;
+  flex: 1;
+}
+
+.od-fulfillment-card__carrier {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.8125rem !important;
+  line-height: 1.45;
+}
+
+.od-fulfillment-card__title {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ella-text);
+}
+
+.od-fulfillment-card__track {
+  margin-top: 0.65rem;
+}
+
+.od-tracking-url {
+  display: block;
+  margin-top: 0.5rem;
+  max-width: 100%;
+  font-size: 0.75rem !important;
+  line-height: 1.45;
+  word-break: break-all;
+}
+
+.od-tracking-url--pending {
+  margin-top: 0.5rem;
+}
+
+.od-track-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ella-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.od-track-link:hover {
+  opacity: 0.75;
+}
+
+.od-empty-hint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ella-muted);
+}
+
+.od-summary-card {
+  background: var(--ella-surface);
+  border: 1px solid var(--ella-border);
+  padding: clamp(1.25rem, 2.5vw, 1.65rem);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 50%) inset,
+    0 18px 48px rgb(35 35 35 / 5%);
+  margin-bottom: 1rem;
+}
+
+.od-summary-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.od-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.od-summary-row__label {
+  color: var(--ella-muted);
+}
+
+.od-summary-row__value {
+  font-variant-numeric: tabular-nums;
+  color: var(--ella-text);
+  font-weight: 500;
+}
+
+.od-summary-row--discount .od-summary-row__value {
+  color: #0f5132;
+}
+
+.od-summary-divider {
+  margin: 0.85rem 0 !important;
+  border-color: var(--ella-border) !important;
+}
+
+.od-summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.od-summary-total__label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ella-muted);
+}
+
+.od-summary-total__value {
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: -0.03em;
+  color: var(--ella-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.od-summary-note {
+  margin: 1rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--ella-border);
+  font-size: 0.8125rem;
+  color: var(--ella-muted);
+  line-height: 1.5;
+}
+
+.od-back-row {
+  margin-top: 0.5rem;
+}
+
+.od-back-btn {
+  border-radius: 0 !important;
+  height: 44px !important;
+  padding: 0 1.25rem !important;
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}

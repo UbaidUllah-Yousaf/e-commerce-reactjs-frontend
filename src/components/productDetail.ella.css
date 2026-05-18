@@ -1,0 +1,384 @@
+/* Ella 7–inspired PDP layout (imported after base productDetail rules). */
+
+.ella-pdp-shell {
+  max-width: 1240px;
+}
+
+.ella-pdp-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(280px, 400px);
+  gap: clamp(2rem, 4vw, 3.75rem);
+  align-items: start;
+}
+
+@media (max-width: 991px) {
+  .ella-pdp-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ella-pdp-aside {
+    order: 2;
+  }
+
+  .ella-pdp-gallery-column {
+    order: 1;
+  }
+}
+
+.ella-pdp-gallery-column {
+  min-width: 0;
+}
+
+.ella-pdp-feature-card {
+  border: 1px solid var(--ella-border);
+  background: var(--ella-surface);
+}
+
+.ella-pdp-feature-shot {
+  aspect-ratio: 4 / 5;
+  background: #eceae6;
+}
+
+.ella-pdp-feature-shot img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.ella-pdp-thumb-strip {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  overflow-x: auto;
+  border-top: 1px solid var(--ella-border);
+  scrollbar-width: thin;
+}
+
+.ella-pdp-thumb-btn {
+  flex: 0 0 76px;
+  width: 76px;
+  height: 98px;
+  padding: 0;
+  border: 1px solid var(--ella-border);
+  cursor: pointer;
+  background: #f6f5f3;
+  overflow: hidden;
+  transition:
+    opacity 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.ella-pdp-thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ella-pdp-thumb-btn--active {
+  border-color: var(--ella-text);
+  box-shadow: inset 0 0 0 1px var(--ella-text);
+}
+
+.ella-pdp-aside .shopify-product-buy-card {
+  position: relative !important;
+  top: auto !important;
+}
+
+.ella-pdp-aside {
+  position: sticky;
+  top: calc(92px + 1rem);
+}
+
+.ella-pdp-buy-sheet {
+  border: 1px solid var(--ella-border) !important;
+}
+
+.ella-pdp-buy-sheet .ant-card-body {
+  padding: clamp(1.25rem, 3vw, 1.85rem) !important;
+}
+
+.ella-pdp-buy-head {
+  border-bottom: 1px solid var(--ella-border);
+  padding-bottom: 1rem;
+  margin-bottom: 0 !important;
+}
+
+.ella-pdp-price-row {
+  margin-top: 0.5rem;
+}
+
+.ella-pdp-stock {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ella-pdp-option-block {
+  padding-top: 0.35rem;
+}
+
+.ella-pdp-option-heading {
+  display: block;
+  margin-bottom: 0.65rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ella-muted);
+}
+
+.ella-pdp-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ella-pdp-pill {
+  min-height: 44px;
+  padding: 0 1.25rem;
+  border: 1px solid var(--ella-border);
+  background: transparent;
+  color: var(--ella-text);
+  font-family: var(--ella-font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.ella-pdp-pill:hover {
+  border-color: var(--ella-text);
+}
+
+.ella-pdp-pill--active {
+  border-color: var(--ella-text);
+  background: rgba(35, 35, 35, 0.04);
+  box-shadow: inset 0 0 0 1px var(--ella-text);
+}
+
+.ella-pdp-qty-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ella-pdp-trust {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .ella-pdp-trust {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ella-pdp-trust-line {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ella-pdp-trust-sub {
+  font-size: 0.78125rem;
+  color: var(--ella-muted);
+}
+
+.ella-pdp-inline-collection {
+  margin: 2rem 0 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.ella-pdp-inline-label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ella-pdp-collapse.ant-collapse {
+  background: transparent;
+  margin-top: 2rem;
+}
+
+.ella-pdp-collapse.ant-collapse > .ant-collapse-item {
+  border-bottom: 1px solid var(--ella-border);
+}
+
+.ella-pdp-collapse.ant-collapse > .ant-collapse-item > .ant-collapse-header {
+  padding: 1.05rem 0 !important;
+  font-family: var(--ella-font-display);
+  font-weight: 500;
+  font-size: 1.15rem !important;
+}
+
+.ella-pdp-collapse.ant-collapse > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
+  padding: 0 0 1.25rem !important;
+}
+
+.ella-pdp-copy {
+  color: var(--ella-muted);
+  font-size: 0.98125rem;
+  line-height: 1.75;
+  margin-bottom: 1rem !important;
+}
+
+.ella-pdp-spec-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 20px;
+}
+
+.ella-pdp-spec-k {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ella-muted);
+  margin-bottom: 4px;
+}
+
+.ella-pdp-spec-v {
+  font-size: 0.9rem;
+}
+
+/* Size chart (GET /size-charts/by-tag/) */
+.ella-size-chart-loading {
+  padding: 0.5rem 0;
+}
+
+.ella-size-chart-wrap {
+  overflow-x: auto;
+  margin-top: 0.25rem;
+}
+
+.ella-size-chart-table {
+  width: 100%;
+  min-width: 280px;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  color: var(--ella-text);
+}
+
+.ella-size-chart-table th,
+.ella-size-chart-table td {
+  border: 1px solid var(--ella-border);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.ella-size-chart-table thead th {
+  background: rgb(35 35 35 / 4%);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ella-muted);
+}
+
+.ella-size-chart-table__corner {
+  width: 28%;
+  background: rgb(35 35 35 / 4%);
+}
+
+.ella-size-chart-table__row-head {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  background: rgb(35 35 35 / 3%);
+}
+
+.ella-size-chart-table__cell {
+  font-variant-numeric: tabular-nums;
+}
+
+.ella-size-chart-footnote {
+  margin: 12px 0 0;
+  font-size: 0.75rem;
+  color: var(--ella-muted);
+  line-height: 1.5;
+}
+
+/* Size fit assistant (below chart) */
+.ella-size-fit__assistant {
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px dashed var(--ella-border);
+}
+
+.ella-size-fit__title {
+  display: block;
+  font-size: 0.8125rem;
+  margin-bottom: 0.35rem;
+}
+
+.ella-size-fit__hint {
+  margin-bottom: 1rem !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.55 !important;
+}
+
+.ella-size-fit__inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px 16px;
+  margin-bottom: 1rem;
+}
+
+.ella-size-fit__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ella-size-fit__label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ella-muted);
+}
+
+.ella-size-fit__input {
+  width: 100% !important;
+}
+
+.ella-size-fit__actions {
+  margin-bottom: 0.5rem;
+}
+
+.ella-size-fit__result {
+  display: block;
+  font-size: 0.875rem;
+}
+
+.ella-size-fit__note {
+  font-weight: 400;
+  color: var(--ella-muted);
+}
+
+.ella-size-fit__apply {
+  margin-top: 0.75rem;
+}
+
+.ella-size-fit__warn {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}

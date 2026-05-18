@@ -1,0 +1,115 @@
+@import './theme/store-layout.css';
+
+:root {
+  color-scheme: light;
+
+  /** Numeric notification badges (navbar cart/wishlist, filter counts, etc.) */
+  --site-badge-count-bg: #dc2626;
+  --site-badge-count-color: #ffffff;
+
+  --ella-bg: #f7f5f2;
+  --ella-surface: #ffffff;
+  --ella-text: #232323;
+  --ella-muted: #6b6b6b;
+  --ella-border: rgba(35, 35, 35, 0.09);
+  --ella-accent: #232323;
+  --ella-announcement: #232323;
+
+  --ella-font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --ella-font-body: 'Jost', system-ui, -apple-system, sans-serif;
+
+  --pdp-accent: #232323;
+  --shopify-divider: rgba(35, 35, 35, 0.09);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html {
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  color: var(--ella-text);
+  background: var(--ella-bg);
+  font-family: var(--ella-font-body);
+  font-weight: 400;
+  font-feature-settings: 'liga' 1, 'kern' 1;
+  overflow-x: clip;
+}
+
+#root {
+  overflow-x: clip;
+}
+
+h1,
+h2,
+h3,
+.ella-font-display {
+  font-family: var(--ella-font-display);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.hero-shop-btn {
+  height: 50px !important;
+  padding: 0 2rem !important;
+  border-radius: 0 !important;
+  font-weight: 600 !important;
+  font-size: 0.6875rem !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  background: var(--ella-text) !important;
+  border-color: var(--ella-text) !important;
+  box-shadow: none !important;
+}
+
+.hero-shop-btn:hover {
+  opacity: 0.88;
+  background: var(--ella-text) !important;
+  border-color: var(--ella-text) !important;
+}
+
+.hero-browse-btn {
+  height: 50px !important;
+  padding: 0 2rem !important;
+  border-radius: 0 !important;
+  font-weight: 600 !important;
+  font-size: 0.6875rem !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  border: 1px solid var(--ella-text) !important;
+  color: var(--ella-text) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.hero-browse-btn:hover {
+  color: var(--ella-surface) !important;
+  background: var(--ella-text) !important;
+  border-color: var(--ella-text) !important;
+}
+
+.shopify-collection-filter-tag.ant-tag {
+  margin: 0;
+  padding: 6px 12px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ella-text) !important;
+  background: rgba(35, 35, 35, 0.05) !important;
+  border: 1px solid var(--ella-border) !important;
+  border-radius: 0 !important;
+}

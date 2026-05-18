@@ -1,0 +1,59 @@
+.auth-page {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem 4rem;
+  background: var(--ella-bg);
+}
+
+.auth-panel {
+  width: 100%;
+  max-width: 420px;
+  padding: 2.25rem 2rem;
+  background: var(--ella-surface);
+  border: 1px solid var(--ella-border);
+}
+
+.auth-panel__eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ella-muted);
+}
+
+.auth-panel__title {
+  margin: 0 0 0.75rem !important;
+  font-family: var(--ella-font-display) !important;
+  font-weight: 500 !important;
+  font-size: 2rem !important;
+}
+
+.auth-panel__lede {
+  margin-bottom: 1.75rem !important;
+}
+
+.auth-panel .ant-btn-primary {
+  width: 100%;
+  height: 48px !important;
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+}
+
+.auth-panel-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--ella-muted);
+}
+
+.auth-panel-footer a {
+  color: var(--ella-text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

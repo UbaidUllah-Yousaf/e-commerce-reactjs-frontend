@@ -1,0 +1,70 @@
+Summary,Issue Type,Description,Epic Name,Sprint,Priority,Story Points,Component,Labels,Layer,Acceptance Criteria
+Platform Foundation,Epic,"Admin auth, integration settings singleton, audit logging, API documentation.",,Sprint 1,High,,Backend,foundation,Backend,
+Stripe Payments,Epic,"Stripe PaymentIntent/Checkout Session, webhooks, checkout payment_method branching.",,Sprint 1,Highest,,Backend,stripe,Backend,
+Admin Interface,Epic,"React admin app: dashboard, settings, operations screens.",,Sprint 1-4,High,,Admin,admin,Admin,
+Courier Integrations,Epic,"TCS and Leopard adapters, shipment booking, label generation.",,Sprint 2,Highest,,Backend,courier,Backend,
+Tracking Module,Epic,"Carrier status polling, webhooks, unified tracking dashboard.",,Sprint 2-4,High,,Backend,tracking,Backend,
+Email Notifications,Epic,"Transactional email provider, templates, triggers.",,Sprint 3,High,,Backend,email,Backend,
+Invoice Generation,Epic,"PDF invoices for orders, storage, email attachment.",,Sprint 3,High,,Backend,invoice,Backend,
+Import Export,Epic,Bulk catalog import/export via async jobs.,,Sprint 3,High,,Backend,import-export,Backend,
+Store Locator,Epic,"Physical store locations, geo search, pickup.",,Sprint 4,Medium,,Backend,stores,Backend,
+AI Assistant,Epic,Product/collection search chatbot with tool calling.,,Sprint 4,High,,Backend,ai,Backend,
+POS Module,Epic,"In-store POS sessions, sales, receipts.",,Sprint 4,High,,Backend,pos,Backend,
+Staff roles and admin JWT/session auth,Task,Implement IsAdminUser or custom Role model; protect /admin/* API routes.,Platform Foundation,Sprint 1,High,5,Backend,"auth,admin",Backend,Non-staff users receive 403 on admin endpoints.
+IntegrationSettings encrypted singleton model,Task,"Store Stripe, email, TCS, Leopard, AI credentials encrypted at rest.",Platform Foundation,Sprint 1,High,5,Backend,"settings,integrations",Backend,Settings CRUD via admin API; secrets masked in responses.
+Stripe PaymentIntent or Checkout Session on checkout,Task,Tie Stripe payment to checkout_id; return client_secret or checkout_url for card flow.,Stripe Payments,Sprint 1,Highest,8,Backend,"stripe,payments",Backend,Card checkout initiates Stripe without completing order until paid.
+Stripe webhook payment_intent.succeeded,Task,Webhook sets order financial_status=paid; idempotency keys for retries.,Stripe Payments,Sprint 1,Highest,8,Backend,"stripe,webhooks",Backend,Duplicate webhook events do not corrupt order state.
+Extend checkout complete for payment_method cod|card,Task,POST /checkouts/{id}/complete/ branches: COD completes immediately; card returns payment payload.,Stripe Payments,Sprint 1,High,5,Backend,"checkout,api",Backend,API accepts payment_method and returns correct response per method.
+POST /checkouts/{id}/payment/ endpoint,Task,Initiate or confirm Stripe payment; return client_secret or checkout_url.,Stripe Payments,Sprint 1,High,5,Backend,"stripe,api",Backend,Documented in OpenAPI; works with storefront card flow.
+Admin audit log for integration changes,Task,Log admin actions on settings and sensitive operations.,Platform Foundation,Sprint 1,Medium,3,Backend,"audit,admin",Backend,"Audit entries show actor, action, timestamp."
+OpenAPI: document Sprint 1 payment endpoints,Task,Update drf-spectacular for payment and webhook routes.,Platform Foundation,Sprint 1,Medium,2,Backend,"docs,api",Backend,Endpoints visible in /api/docs/.
+Storefront: send payment_method on checkout complete,Task,Wire paymentMethod into finalizePayload in Checkout.tsx.,Stripe Payments,Sprint 1,High,3,Storefront,"stripe,checkout",Storefront,Selected COD or card is sent to API on submit.
+Storefront: Stripe redirect/confirm return flow,Task,Handle Stripe return URL and payment confirmation after redirect.,Stripe Payments,Sprint 1,High,5,Storefront,"stripe,checkout",Storefront,Successful card payment lands on order confirmation page.
+Storefront: VITE_STRIPE_PUBLISHABLE_KEY env config,Task,Document and type Stripe publishable key in .env.example.,Stripe Payments,Sprint 1,Low,1,Storefront,"stripe,config",Storefront,Env var documented for production builds.
+Admin app bootstrap: login and dashboard shell,Story,"New admin-ui routes: staff login, layout, navigation.",Admin Interface,Sprint 1,High,8,Admin,"admin,ui",Admin,Staff can log in and access dashboard shell.
+Admin Integration Settings page,Story,"UI to read/write masked Stripe, courier, email, AI credentials.",Admin Interface,Sprint 1,High,5,Admin,"admin,settings",Admin,Integration keys editable without exposing full secrets.
+CourierAdapter abstract interface,Task,"Methods: create_shipment, get_label, track, cancel.",Courier Integrations,Sprint 2,High,5,Backend,"courier,architecture",Backend,Adapters pluggable by carrier code.
+TCS courier adapter (sandbox),Story,"TCS API for booking, labels, tracking in sandbox.",Courier Integrations,Sprint 2,Highest,13,Backend,"tcs,courier",Backend,Test AWB created; tracking returns status.
+Leopard courier adapter (sandbox),Story,"Leopard API for booking, labels, tracking in sandbox.",Courier Integrations,Sprint 2,Highest,13,Backend,"leopard,courier",Backend,Test AWB created; tracking returns status.
+POST /orders/{id}/fulfillments/ API,Task,Create fulfillment with carrier; auto-book or manual AWB.,Courier Integrations,Sprint 2,High,8,Backend,"fulfillment,api",Backend,Fulfillment saved with tracking_number and service FK.
+GET /tracking/{awb}/ public tracking lookup,Task,Resolve AWB to carrier status for admin and customers.,Tracking Module,Sprint 2,Medium,5,Backend,"tracking,api",Backend,Returns latest scan events for valid AWB.
+Celery beat: poll carrier tracking status,Task,Update Fulfillment.status from TCS/Leopard APIs.,Tracking Module,Sprint 2,High,8,Backend,"celery,tracking",Backend,Statuses sync to in_transit/success automatically.
+Carrier webhook endpoints (if supported),Task,Push updates from TCS/Leopard when available.,Courier Integrations,Sprint 2,Medium,5,Backend,"webhooks,courier",Backend,Webhook updates fulfillment near real-time.
+Admin fulfillment queue UI,Story,"Filter by status, carrier, date; action unfulfilled orders.",Admin Interface,Sprint 2,High,8,Admin,"admin,fulfillment",Admin,Staff can create fulfillments from queue.
+Admin bulk print shipping labels,Task,Download/print labels for selected fulfillments.,Courier Integrations,Sprint 2,Medium,5,Admin,"admin,labels",Admin,Bulk label download works for TCS and Leopard.
+Admin courier config per FulfillmentService,Task,Link carrier credentials to fulfillment service profiles.,Courier Integrations,Sprint 2,Medium,3,Admin,"admin,courier",Admin,Each service uses correct carrier account.
+Storefront: optional fulfillment status_detail badge,Task,Show carrier scan message on OrderDetail when API provides status_detail.,Tracking Module,Sprint 2,Low,2,Storefront,"tracking,orders",Storefront,Latest carrier message visible on order page.
+OpenAPI: document fulfillment and tracking endpoints,Task,Schema for Sprint 2 APIs.,Courier Integrations,Sprint 2,Low,2,Backend,"docs,api",Backend,Swagger updated.
+Email provider abstraction (SendGrid/Resend/SMTP),Task,Pluggable backend with Django HTML templates.,Email Notifications,Sprint 3,High,5,Backend,"email,integrations",Backend,Test email sends via configured provider.
+Email trigger: order confirmation,Task,Send on order complete with line items summary.,Email Notifications,Sprint 3,High,3,Backend,"email,orders",Backend,Customer receives confirmation after purchase.
+Email trigger: payment receipt,Task,Send when financial_status becomes paid.,Email Notifications,Sprint 3,Medium,2,Backend,"email,payments",Backend,Receipt email sent for card payments.
+Email trigger: shipped with tracking link,Task,Send when fulfillment ships.,Email Notifications,Sprint 3,High,3,Backend,"email,shipping",Backend,Email contains working track URL.
+Email trigger: password reset,Task,Wire auth reset flow to email provider.,Email Notifications,Sprint 3,Medium,2,Backend,"email,auth",Backend,Reset link delivered via email.
+POST /orders/{id}/resend-confirmation/ admin endpoint,Task,Staff can resend order confirmation email.,Email Notifications,Sprint 3,Low,2,Backend,"email,admin",Backend,Resend rate-limited and logged.
+PDF invoice generator,Story,"WeasyPrint/reportlab: lines, tax, shipping, company header.",Invoice Generation,Sprint 3,High,8,Backend,"invoice,pdf",Backend,PDF matches order totals.
+GET /orders/{id}/invoice.pdf endpoint,Task,Auth: customer owns order or staff.,Invoice Generation,Sprint 3,High,3,Backend,"invoice,api",Backend,Authorized download; others 403.
+Store invoice PDF in Cloudinary/S3,Task,Persist PDF; attach URL to confirmation email.,Invoice Generation,Sprint 3,Medium,3,Backend,"invoice,storage",Backend,PDF URL stored on order record.
+Admin invoice download on order detail,Task,Download button in admin order view.,Invoice Generation,Sprint 3,Medium,2,Admin,"admin,invoice",Admin,Staff downloads invoice from order.
+Storefront invoice download on order detail,Task,Customer download link on OrderDetail page.,Invoice Generation,Sprint 3,Medium,2,Storefront,"invoice,orders",Storefront,Customer downloads own invoice PDF.
+Celery import job: products variants collections inventory,Story,"CSV/XLSX validate, preview, commit; error report.",Import Export,Sprint 3,High,13,Backend,"import,celery",Backend,100+ rows import async without blocking.
+Celery export job with catalog filters,Task,Export matches list API filters.,Import Export,Sprint 3,Medium,5,Backend,"export,celery",Backend,Filtered XLSX/CSV download.
+POST /admin/import/{entity}/ and GET /admin/export/{entity}/,Task,Admin APIs for import/export jobs.,Import Export,Sprint 3,High,5,Backend,"import-export,api",Backend,Job status polling endpoint documented.
+Admin import wizard UI,Story,"Upload, preview, run, download errors.",Import Export,Sprint 3,High,8,Admin,"admin,import",Admin,Staff completes import with progress feedback.
+Admin export with filters UI,Task,Export from catalog admin views.,Import Export,Sprint 3,Medium,3,Admin,"admin,export",Admin,Export respects current filters.
+Admin email template editor,Story,Edit subject/body with variable documentation.,Email Notifications,Sprint 3,Medium,5,Admin,"admin,email",Admin,Templates saved and used by triggers.
+StoreLocation model and migrations,Task,"Fields: name, lat, lng, address, hours, phone, is_pickup_enabled.",Store Locator,Sprint 4,High,3,Backend,"stores,models",Backend,CRUD via admin API.
+GET /stores/ with geo query,Task,?lat=&lng=&radius_km= returns nearest stores.,Store Locator,Sprint 4,High,5,Backend,"stores,api",Backend,Geo search returns sorted results.
+Admin store CRUD with map pin picker,Story,Manage locations on interactive map.,Store Locator,Sprint 4,High,8,Admin,"admin,stores",Admin,Staff adds/edits stores with map UI.
+Storefront store locator page,Story,Map/list; find nearest store by location.,Store Locator,Sprint 4,High,8,Storefront,"stores,locator",Storefront,Customers find stores on /stores page.
+PDP optional pick up at store,Task,Pickup store selection when API supports.,Store Locator,Sprint 4,Low,5,Storefront,"stores,pickup",Storefront,Pickup store selectable at checkout when enabled.
+Catalog embeddings index for AI search,Task,Sync products/collections to embeddings table.,AI Assistant,Sprint 4,High,8,Backend,"ai,search",Backend,Index refreshes on catalog changes.
+POST /assistant/chat with tool calling,Story,"Tools: search_products, search_collections, get_product.",AI Assistant,Sprint 4,High,13,Backend,"ai,api",Backend,Natural language returns relevant products.
+AI rate limits and prompt guardrails,Task,Token caps; no PII in logs.,AI Assistant,Sprint 4,Medium,3,Backend,"ai,security",Backend,Abuse limited; logs sanitized.
+Admin AI prompt and logs config,Task,Configure system prompt; view sanitized logs.,AI Assistant,Sprint 4,Medium,5,Admin,"admin,ai",Admin,Staff adjusts assistant from admin.
+Storefront AI chat widget,Story,"Floating widget on home, PLP, PDP.",AI Assistant,Sprint 4,High,8,Storefront,"ai,chat",Storefront,Users search products via chat.
+POS models: Register PosSession PosSale,Task,Link PosSale to Order; session open/close.,POS Module,Sprint 4,High,5,Backend,"pos,models",Backend,Models migrated and in admin API.
+POS APIs: sessions and sales,Story,"Open/close session, cart, cash/card split, receipt payload.",POS Module,Sprint 4,High,13,Backend,"pos,api",Backend,Complete sale creates order.
+Inventory decrement on POS/order complete,Task,Stock decreases on successful sale.,POS Module,Sprint 4,Medium,5,Backend,"pos,inventory",Backend,Inventory accurate after POS sale.
+Admin POS UI: barcode scan and quick search,Story,In-store POS screen for cashiers.,POS Module,Sprint 4,High,13,Admin,"pos,ui",Admin,Cashier completes sale from POS UI.
+Unified admin tracking dashboard,Story,Orders to fulfillments to carrier timeline; filters; CSV export.,Tracking Module,Sprint 4,High,13,Admin,"admin,tracking",Admin,Delayed/exception orders visible; CSV export works.
+OpenAPI: document Sprint 4 endpoints,Task,"stores, assistant, pos in schema.",Platform Foundation,Sprint 4,Low,2,Backend,"docs,api",Backend,Swagger complete for Sprint 4.

@@ -1,0 +1,142 @@
+.ella-listing-banners {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 1.75rem;
+}
+
+.ella-listing-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--ella-border);
+  border-radius: 0;
+}
+
+.ella-listing-banner__body {
+  flex: 1;
+  min-width: min(100%, 240px);
+}
+
+.ella-listing-banner__headline {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ella-text);
+  line-height: 1.45;
+}
+
+.ella-listing-banner__subline {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--ella-muted);
+  line-height: 1.5;
+  max-width: 52rem;
+}
+
+/* Slim bar — shipping / policy messaging */
+.ella-listing-banner--stripe {
+  background: linear-gradient(90deg, rgba(247, 245, 242, 0.98), rgba(236, 234, 230, 0.65));
+  padding: 0.65rem 1.1rem;
+}
+
+.ella-listing-banner--stripe .ella-listing-banner__headline {
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+
+.ella-listing-banner--stripe .ella-listing-banner__subline {
+  margin-top: 0.2rem;
+  font-size: 0.8125rem;
+}
+
+/* Highlight row — campaign */
+.ella-listing-banner--promo {
+  background: var(--ella-text);
+  border-color: var(--ella-text);
+  color: #f7f5f2;
+}
+
+.ella-listing-banner--promo .ella-listing-banner__headline {
+  color: #f7f5f2;
+  letter-spacing: 0.12em;
+}
+
+.ella-listing-banner--promo .ella-listing-banner__subline {
+  color: rgba(247, 245, 242, 0.78);
+}
+
+.ella-listing-banner--promo .ella-listing-banner__btn {
+  flex-shrink: 0;
+  background: #f7f5f2 !important;
+  color: var(--ella-text) !important;
+  border: none !important;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.6875rem !important;
+  padding: 0 1.35rem !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  border-radius: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.ella-listing-banner--promo .ella-listing-banner__btn:hover {
+  opacity: 0.92;
+}
+
+/* Quiet inline — secondary message + text link */
+.ella-listing-banner--minimal {
+  background: var(--ella-surface);
+}
+
+.ella-listing-banner__cta {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ella-text);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 1px;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.ella-listing-banner__cta:hover {
+  color: var(--ella-muted);
+  border-bottom-color: var(--ella-muted);
+}
+
+.ella-listing-banner__cta-icon {
+  font-size: 10px;
+  opacity: 0.85;
+}
+
+@media (max-width: 640px) {
+  .ella-listing-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ella-listing-banner--promo .ella-listing-banner__btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

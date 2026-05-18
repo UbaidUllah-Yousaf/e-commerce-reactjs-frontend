@@ -1,0 +1,116 @@
+.site-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--ella-border);
+  background: var(--ella-surface);
+}
+
+.site-footer__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 5vw, 4rem) clamp(1rem, 3vw, 2rem) 2rem;
+}
+
+.site-footer__newsletter {
+  display: grid;
+  grid-template-columns: 1fr minmax(280px, 420px);
+  gap: clamp(2rem, 4vw, 3rem);
+  align-items: end;
+  padding-bottom: clamp(2rem, 4vw, 3rem);
+  border-bottom: 1px solid var(--ella-border);
+}
+
+@media (max-width: 768px) {
+  .site-footer__newsletter {
+    grid-template-columns: 1fr;
+  }
+}
+
+.site-footer__label {
+  margin: 0 0 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ella-muted);
+}
+
+.site-footer__headline {
+  margin: 0;
+  font-family: var(--ella-font-display);
+  font-weight: 500;
+  font-size: clamp(1.6rem, 3vw, 2rem);
+  line-height: 1.15;
+}
+
+.site-footer__hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ella-muted);
+  line-height: 1.5;
+}
+
+.site-footer__signup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.site-footer__input {
+  flex: 1 1 160px !important;
+  border-radius: 0 !important;
+  height: 48px !important;
+}
+
+.site-footer__subscribe {
+  border-radius: 0 !important;
+  min-width: 132px !important;
+  height: 48px !important;
+}
+
+.site-footer__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
+  padding: clamp(2rem, 4vw, 3rem) 0;
+}
+
+@media (max-width: 600px) {
+  .site-footer__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.site-footer__col-title {
+  margin: 0 0 1rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ella-muted);
+}
+
+.site-footer__link {
+  display: block;
+  margin-bottom: 0.65rem;
+  font-size: 0.9rem;
+  color: var(--ella-text);
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.site-footer__link:hover {
+  opacity: 0.62;
+}
+
+.site-footer__link--muted {
+  color: var(--ella-muted);
+  cursor: default;
+}
+
+.site-footer__bottom {
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--ella-border);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--ella-muted);
+}

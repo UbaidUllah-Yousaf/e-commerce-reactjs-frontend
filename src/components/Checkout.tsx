@@ -26,7 +26,22 @@ import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { getSafeImageSrc, handleImageError } from '../utils/image'
 import { parseMoney } from '../utils/catalog'
-import { lineupSubtotalCheckout, formatTotalsHint } from '../utils/commerce'
+import {
+  checkoutDisplayGrandTotal,
+  checkoutDisplayShipping,
+  DEFAULT_CHECKOUT_SHIPPING_PKR,
+  isCheckoutPaymentRequired,
+  lineupSubtotalCheckout,
+} from '../utils/commerce'
+import { fetchStripeConfig, createCheckoutPaymentSession } from '../api/stripe'
+import {
+  availablePaymentModes,
+  defaultPaymentMode,
+  isCodAvailable,
+  isStripeCheckoutAvailable,
+  resolveStripeCheckoutUrls,
+  type CheckoutPaymentMode,
+} from '../utils/stripeCheckout'
 import type { ProductVariant } from '../types/catalog'
 import {
   createCheckout,
@@ -116,7 +131,8 @@ function buildAddress(v: AddressForm): Record<string, unknown> {
     address1: v.address,
     city: v.city,
     zip: v.postalCode ?? '',
-    country: v.country,
+    country_code: 'PK',
+    province_code: '',
     phone: v.phone ?? '',
   }
 }
@@ -183,10 +199,11 @@ const Checkout = () => {
   const { state: cartState, dispatch: cartDispatch } = useCart()
   const { user, isAuthenticated, loading: authLoading } = useAuth()
   const checkoutPrefillPk = useRef<number | null>(null)
+  const shippingSyncedRef = useRef(false)
   const [form] = Form.useForm<AddressForm & { marketingOptIn?: boolean; saveInfo?: boolean }>()
   const [discountCode, setDiscountCode] = useState('')
   const [giftCode, setGiftCode] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState('cod')
+  const [paymentMethod, setPaymentMethod] = useState<CheckoutPaymentMode>('stripe')
   const [billingSame, setBillingSame] = useState(true)
   const [checkoutId, setCheckoutId] = useState<number | null>(null)
   const [bootError, setBootError] = useState<string | null>(null)
@@ -280,6 +297,52 @@ const Checkout = () => {
     enabled: checkoutId != null,
   })
 
+  const { data: stripeConfig } = useQuery({
+    queryKey: ['stripe', 'config'],
+    queryFn: fetchStripeConfig,
+    staleTime: 60 * 1000,
+  })
+
+  const paymentModes = useMemo(() => availablePaymentModes(stripeConfig), [stripeConfig])
+
+  useEffect(() => {
+    if (stripeConfig) {
+      setPaymentMethod(defaultPaymentMode(stripeConfig))
+    }
+  }, [stripeConfig])
+
+  useEffect(() => {
+    shippingSyncedRef.current = false
+  }, [checkoutId])
+
+  useEffect(() => {
+    if (checkoutId == null || !checkout || checkout.status !== 'open') return
+    if (!checkout.line_items?.length) return
+    if (parseMoney(checkout.shipping_total) >= DEFAULT_CHECKOUT_SHIPPING_PKR - 0.01) return
+    if (shippingSyncedRef.current) return
+
+    shippingSyncedRef.current = true
+    let cancelled = false
+
+    void (async () => {
+      try {
+        const updated = await patchCheckout(checkoutId, {
+          shipping_total: `${DEFAULT_CHECKOUT_SHIPPING_PKR}.00`,
+          tax_total: checkout.tax_total ?? '0.00',
+        })
+        if (!cancelled) {
+          await queryClient.setQueryData(['checkout', checkoutId], updated)
+        }
+      } catch {
+        shippingSyncedRef.current = false
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [checkoutId, checkout, queryClient])
+
   const customerEnabled = Boolean(isAuthenticated && user && !authLoading)
 
   const customerProfileQuery = useQuery({
@@ -352,13 +415,23 @@ const Checkout = () => {
   const subtotalLocal = cartState.items.reduce((s, i) => s + i.price * i.quantity, 0)
   const subtotal = serverLines ? subtotalServer : subtotalLocal
 
-  const shipping = parseMoney(checkout?.shipping_total) || (subtotal > 0 ? 250 : 0)
+  const shipping = checkout ? checkoutDisplayShipping(checkout) : subtotal > 0 ? DEFAULT_CHECKOUT_SHIPPING_PKR : 0
   const tax = parseMoney(checkout?.tax_total)
   const discount = parseMoney(checkout?.discount_amount)
   const giftSum =
     checkout?.gift_card_applications?.reduce((s, g) => s + parseMoney(g.amount_applied), 0) ?? 0
-  const grandFromParts = Math.max(0, subtotal + shipping + tax - discount - giftSum)
-  const totalsHint = formatTotalsHint(checkout?.totals)
+  const grandTotal = checkout ? checkoutDisplayGrandTotal(checkout) : Math.max(0, subtotal + shipping + tax - discount - giftSum)
+  const paymentRequired = isCheckoutPaymentRequired(checkout)
+  const stripeAvailable = isStripeCheckoutAvailable(stripeConfig)
+  const codAvailable = isCodAvailable(stripeConfig)
+
+  const payButtonLabel = !paymentRequired
+    ? 'Complete order'
+    : paymentMethod === 'stripe' && stripeAvailable
+      ? 'Continue to secure payment'
+      : paymentMethod === 'cod'
+        ? 'Place order (COD)'
+        : 'Place order'
 
   const handleApplyDiscount = async () => {
     if (checkoutId == null) return
@@ -415,6 +488,24 @@ const Checkout = () => {
     }
   }
 
+  const navigateAfterOrder = async (id: number) => {
+    sessionStorage.removeItem(CK_ID)
+    sessionStorage.removeItem(CK_FP)
+    cartDispatch({ type: 'CLEAR_CART' })
+    message.success('Order placed successfully!')
+    try {
+      const orders = await fetchOrders()
+      const match = orders.find((o) => o.checkout === id)
+      if (match) {
+        navigate(`/orders/${match.id}`)
+        return
+      }
+    } catch {
+      /* ignore */
+    }
+    navigate('/account?ordered=1')
+  }
+
   const handleSubmit = async () => {
     if (checkoutId == null || !checkout) {
       message.error('Checkout is not ready yet.')
@@ -428,29 +519,49 @@ const Checkout = () => {
         phone: values.phone,
         billing_same_as_shipping: billingSame,
         shipping_address: ship,
-        billing_address: ship,
+        billing_address: billingSame ? ship : ship,
         currency: 'PKR',
-        shipping_total: '250.00',
+        shipping_total: `${DEFAULT_CHECKOUT_SHIPPING_PKR}.00`,
         tax_total: checkout.tax_total ?? '0.00',
       }
       setSubmitting(true)
       await patchCheckout(checkoutId, finalizePayload)
-      await completeCheckout(checkoutId, finalizePayload)
-      sessionStorage.removeItem(CK_ID)
-      sessionStorage.removeItem(CK_FP)
-      cartDispatch({ type: 'CLEAR_CART' })
-      message.success('Order placed successfully!')
-      try {
-        const orders = await fetchOrders()
-        const match = orders.find((o) => o.checkout === checkoutId)
-        if (match) {
-          navigate(`/orders/${match.id}`)
-          return
-        }
-      } catch {
-        /* ignore */
+      const fresh = await fetchCheckout(checkoutId)
+      await queryClient.setQueryData(['checkout', checkoutId], fresh)
+
+      const needsPayment = isCheckoutPaymentRequired(fresh)
+      const stripeOn = isStripeCheckoutAvailable(stripeConfig)
+
+      if (needsPayment && paymentMethod === 'stripe' && stripeOn) {
+        const urls = resolveStripeCheckoutUrls(stripeConfig)
+        const session = await createCheckoutPaymentSession(checkoutId, urls)
+        window.location.assign(session.checkout_url)
+        return
       }
-      navigate('/account?ordered=1')
+
+      if (needsPayment && paymentMethod === 'stripe' && !stripeOn) {
+        message.error('Card payment is not available. Choose another option or try again later.')
+        return
+      }
+
+      if (needsPayment && paymentMethod === 'cod' && !codAvailable) {
+        message.error('Cash on delivery is not available for this store. Select card payment.')
+        return
+      }
+
+      if (needsPayment && paymentMethod === 'cod' && codAvailable) {
+        await completeCheckout(checkoutId, finalizePayload)
+        await navigateAfterOrder(checkoutId)
+        return
+      }
+
+      if (!needsPayment) {
+        await completeCheckout(checkoutId, finalizePayload)
+        await navigateAfterOrder(checkoutId)
+        return
+      }
+
+      message.error('Unable to complete checkout. Check payment settings and try again.')
     } catch (e) {
       if (e && typeof e === 'object' && 'errorFields' in e) {
         message.error('Please complete all required fields before continuing.')
@@ -708,7 +819,7 @@ const Checkout = () => {
                         COURIER SERVICES
                       </Text>
                       <Text strong style={{ lineHeight: '48px' }}>
-                        Rs 250.00
+                        {formatDisplayMoney(shipping, currency)}
                       </Text>
                     </div>
                   </Card>
@@ -716,88 +827,88 @@ const Checkout = () => {
                   <Title level={4} style={{ marginBottom: 16 }}>
                     Payment
                   </Title>
-                  <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>
-                    Toggle a payment option to view the gateway details.
-                  </Text>
-                  <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
-                    All transactions are secure and encrypted.
-                  </Text>
-
-                  <Form.Item name="paymentMethod">
-                    <Radio.Group
-                      value={paymentMethod}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      style={{ width: '100%' }}
-                    >
-                      <div style={{ display: 'grid' }}>
-                        {[
-                          {
-                            value: 'cod',
-                            label: 'Cash on Delivery (COD)',
-                            note: 'Pay when your order arrives at your door.',
-                            logos: [] as string[],
-                          },
-                          {
-                            value: 'card',
-                            label: 'Debit - Credit Card',
-                            note: 'Secure card payments via Visa and Mastercard.',
-                            logos: ['Visa', 'Mastercard'],
-                          },
-                        ].map((option) => {
-                          const selected = paymentMethod === option.value
-                          return (
-                            <div
-                              key={option.value}
-                              onClick={() => setPaymentMethod(option.value)}
-                              style={{
-                                border: `1px solid ${selected ? '#2563eb' : '#e5e7eb'}`,
-                                background: selected ? '#eff6ff' : '#fff',
-                                padding: 14,
-                                cursor: 'pointer',
-                                transition: 'background 0.2s, border-color 0.2s',
-                                minHeight: 56,
-                              }}
-                            >
+                  {!paymentRequired ? (
+                    <Alert
+                      type="info"
+                      showIcon
+                      style={{ marginBottom: 16 }}
+                      message="No payment due"
+                      description="Your order total is fully covered. Click below to complete your order."
+                    />
+                  ) : paymentModes.length === 0 ? (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      style={{ marginBottom: 16 }}
+                      message="Payment unavailable"
+                      description="No payment methods are available for this order. Please try again later or contact the store."
+                    />
+                  ) : (
+                    <>
+                      <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+                        {paymentMethod === 'stripe'
+                          ? 'You will be redirected to Stripe Checkout to pay securely.'
+                          : 'Pay when your order arrives. Your order will be placed with payment pending.'}
+                      </Text>
+                      <Form.Item name="paymentMethod">
+                        <Radio.Group
+                          value={paymentMethod}
+                          onChange={(e) => setPaymentMethod(e.target.value as CheckoutPaymentMode)}
+                          style={{ width: '100%' }}
+                        >
+                          <div style={{ display: 'grid' }}>
+                            {stripeAvailable ? (
                               <div
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => setPaymentMethod('stripe')}
+                                onKeyDown={(e) => e.key === 'Enter' && setPaymentMethod('stripe')}
                                 style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'space-between',
-                                  flexWrap: 'wrap',
+                                  border: `1px solid ${paymentMethod === 'stripe' ? '#2563eb' : '#e5e7eb'}`,
+                                  background: paymentMethod === 'stripe' ? '#eff6ff' : '#fff',
+                                  padding: 14,
+                                  cursor: 'pointer',
+                                  minHeight: 56,
                                 }}
                               >
-                                <Radio value={option.value} style={{ marginRight: 8 }}>
-                                  {option.label}
+                                <Radio value="stripe" style={{ marginRight: 8 }}>
+                                  Pay with card (Stripe)
                                 </Radio>
-                                {option.logos.length > 0 && (
-                                  <div>
-                                    {option.logos.map((logo) => (
-                                      <PaymentLogo
-                                        key={logo}
-                                        src={
-                                          logo === 'Visa'
-                                            ? visaLogo
-                                            : logo === 'Mastercard'
-                                              ? mastercardLogo
-                                              : undefined
-                                        }
-                                        alt={`${logo} logo`}
-                                      />
-                                    ))}
+                                {paymentMethod === 'stripe' ? (
+                                  <div style={{ marginTop: 8 }}>
+                                    <PaymentLogo src={visaLogo} alt="Visa" />
+                                    <PaymentLogo src={mastercardLogo} alt="Mastercard" />
                                   </div>
-                                )}
+                                ) : null}
                               </div>
-                              {selected ? (
-                                <Text type="secondary" style={{ fontSize: 13, marginTop: 12, display: 'block' }}>
-                                  {option.note}
-                                </Text>
-                              ) : null}
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </Radio.Group>
-                  </Form.Item>
+                            ) : null}
+                            {codAvailable ? (
+                              <div
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => setPaymentMethod('cod')}
+                                onKeyDown={(e) => e.key === 'Enter' && setPaymentMethod('cod')}
+                                style={{
+                                  border: `1px solid ${paymentMethod === 'cod' ? '#2563eb' : '#e5e7eb'}`,
+                                  background: paymentMethod === 'cod' ? '#eff6ff' : '#fff',
+                                  padding: 14,
+                                  cursor: 'pointer',
+                                  minHeight: 56,
+                                }}
+                              >
+                                <Radio value="cod">Cash on Delivery (COD)</Radio>
+                                {paymentMethod === 'cod' ? (
+                                  <Text type="secondary" style={{ fontSize: 13, marginTop: 12, display: 'block' }}>
+                                    Pay when your order arrives at your door.
+                                  </Text>
+                                ) : null}
+                              </div>
+                            ) : null}
+                          </div>
+                        </Radio.Group>
+                      </Form.Item>
+                    </>
+                  )}
 
                   <Title level={4} style={{ marginBottom: 16 }}>
                     Billing address
@@ -830,9 +941,10 @@ const Checkout = () => {
                     size="large"
                     className="shopify-checkout-primary-btn shopify-checkout-pay-btn"
                     loading={submitting}
+                    disabled={paymentRequired && paymentModes.length === 0}
                     onClick={() => void handleSubmit()}
                   >
-                    Pay now
+                    {payButtonLabel}
                   </Button>
                 </Form>
               </div>
@@ -1045,7 +1157,7 @@ const Checkout = () => {
                       </div>
                     </div>
                     <Title level={4} style={{ margin: 0 }}>
-                      {formatDisplayMoney(grandFromParts, currency)}
+                      {formatDisplayMoney(grandTotal, currency)}
                     </Title>
                   </div>
                 </div>

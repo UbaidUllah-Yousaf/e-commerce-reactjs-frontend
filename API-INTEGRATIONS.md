@@ -106,26 +106,190 @@ If your integration requires assigning a product to a collection or tags over th
 
 ---
 
+## React storefront — checkout, payments, orders
+
+The Vite app implements the native **ecommerce** checkout path that feeds the logistics pipeline when Django creates an `ecommerce.Order`.
+
+### Routes
+
+| Path | Component | Role |
+|------|-----------|------|
+| `/checkout` | `Checkout.tsx` | Server-backed checkout + payment choice |
+| `/checkout/success` | `CheckoutSuccess.tsx` | Stripe return; confirm session → order |
+| `/checkout/cancel` | `CheckoutCancel.tsx` | Abandoned Stripe Checkout |
+| `/orders/:orderId` | `OrderDetail.tsx` | Order receipt + fulfillment panels |
+
+### Checkout API (used by the UI)
+
+All paths are under `/api/v1/` (see `src/api/checkout.ts`, `src/api/stripe.ts`, `src/api/orders.ts`).
+
+| Action | Method | Path |
+|--------|--------|------|
+| Create checkout | POST | `/checkouts/` |
+| Load / patch checkout | GET, PATCH | `/checkouts/{id}/` |
+| Line items | POST, PATCH | `/checkout-line-items/` |
+| Discount / gift card | POST | `/checkouts/{id}/apply-discount/`, `remove-discount/`, `apply-gift-card/`, `remove-gift-card/` |
+| Complete (COD / zero total) | POST | `/checkouts/{id}/complete/` |
+| Stripe config | GET | `/stripe/config/` |
+| Stripe Checkout session | POST | `/checkouts/{id}/payment-session/` |
+| Confirm Stripe return | GET | `/stripe/session/{session_id}/confirm/` |
+| Orders | GET | `/orders/`, `/orders/{id}/` |
+
+Types: `src/types/commerce.ts`. Helpers: `src/utils/commerce.ts`, `src/utils/stripeCheckout.ts`.
+
+### Payment flow
+
+```mermaid
+flowchart TD
+  A[PATCH checkout + address] --> B{Payment required?}
+  B -->|No| C[POST complete]
+  B -->|Yes, Stripe| D[POST payment-session]
+  D --> E[Redirect to Stripe]
+  E --> F[/checkout/success?session_id=]
+  F --> G[GET stripe/session/confirm]
+  G --> H[/orders/:id]
+  B -->|Yes, COD| C
+  C --> H
+```
+
+1. **Bootstrap** — `POST /checkouts/` + line items from cart; resume open checkout via `sessionStorage` (`storefront_ck_id`, `storefront_ck_fp`).
+2. **Shipping** — UI applies `DEFAULT_CHECKOUT_SHIPPING_PKR` (250) via `PATCH` when the API has not set `shipping_total` (`src/utils/commerce.ts`).
+3. **Payment modes** — From `GET /stripe/config/`: **Stripe** when `enabled` or `payment_options.stripe_checkout_available`; **COD** when `payment_options.cod` (or legacy `manual_complete`). URLs from `effective_checkout_urls` / `generated_checkout_urls`, else `{origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}` and `{origin}/checkout/cancel`.
+4. **Stripe** — `POST .../payment-session/` then `window.location.assign(checkout_url)`.
+5. **COD / free** — `POST .../complete/` then navigate to order or account.
+6. **Success page** — `confirmStripeSession` with retries; clears cart; fallback match on latest `paid` order.
+
+Authenticated customers prefill contact/shipping from `GET` customer profile and addresses.
+
+### Orders and fulfillment in the UI
+
+- **Order list / detail** — `financial_status` badges; aggregate and per-line fulfillment via `order.fulfillments` and `fulfillment_service_detail` (`src/utils/orderDisplay.ts`, `src/components/OrderDetail.tsx`).
+- **Logistics link** — Completing checkout (Stripe or COD) creates a backend `Order`; logistics `post_save` enqueues shipment processing (see below). COD orders use `financial_status: pending` for courier COD.
+
+---
+
+## Logistics — shipping and fulfillment (backend)
+
+Centralized shipping for **Shopify**, this **ecommerce** checkout, and external systems via a **custom ingest API**. Courier routing uses admin city rules; shipments go through **Quiqup**; tracking and fulfillments sync back to each platform.
+
+Base URL: `/api/v1/logistics/`.
+
+### Architecture
+
+```mermaid
+flowchart LR
+  subgraph sources [Order sources]
+    SH[Shopify webhook]
+    EC[ecommerce Order signal]
+    IN[Ingest API]
+  end
+  subgraph pipeline [Celery pipeline]
+    R[City router]
+    Q[Quiqup shipment]
+    F[Auto-fulfillment]
+  end
+  subgraph tracking [Tracking]
+    QW[Quiqup webhook]
+    QP[Quiqup poll beat]
+  end
+  SH --> R
+  EC --> R
+  IN --> R
+  R --> Q --> F
+  QW --> F
+  QP --> F
+```
+
+| Step | Task | Description |
+|------|------|-------------|
+| 1 | Ingest | Normalize order → `Shipment` |
+| 2 | `process_shipment_pipeline` | Route city → create Quiqup order → fulfill |
+| 3 | Tracking | Quiqup webhook or scheduled poll → status + tracking sync |
+
+### Integrations at a glance
+
+| Integration | Trigger | Auth / config | Fulfillment target |
+|-------------|---------|---------------|-------------------|
+| **Shopify** | `orders/create` webhook | Per-store HMAC + domain in Django admin | Shopify Admin API fulfillment |
+| **Ecommerce** | `post_save` on new `ecommerce.Order` | None (internal signal) | `ecommerce.Fulfillment` via `create_order_fulfillment` |
+| **Custom ingest** | `POST /api/v1/logistics/orders/ingest/` | Bearer `ingest_api_token` (admin singleton) | Platform set by `source_platform` |
+| **Quiqup** | Pipeline step + tracking | `QUIQUP_*` env vars | N/A (courier) |
+
+### HTTP endpoints
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| `POST` | `/api/v1/logistics/webhooks/shopify/orders-create/` | Shopify order creation webhook |
+| `POST` | `/api/v1/logistics/webhooks/quiqup/` | Quiqup tracking / status updates |
+| `POST` | `/api/v1/logistics/orders/ingest/` | External order ingest (Bearer token) |
+
+### Native ecommerce orders (this storefront)
+
+When a new `ecommerce.Order` is created (checkout **complete** or Stripe **confirm**), `logistics.signals` enqueues `process_custom_order` (skipped if a shipment already exists). COD is inferred when `financial_status` is `pending`. Fulfillments are created when **Fulfillment configuration → auto_fulfill_enabled** is on; the React app reads them on `GET /orders/{id}/`.
+
+### Custom ingest API
+
+Set **Fulfillment configuration → ingest_api_token** in admin:
+
+```http
+POST /api/v1/logistics/orders/ingest/
+Authorization: Bearer <ingest_api_token>
+Content-Type: application/json
+```
+
+Example body (include `ecommerce_order_id` when linking to an existing order):
+
+```json
+{
+  "source_platform": "ecommerce",
+  "external_order_id": "ext-12345",
+  "order_number": "#1001",
+  "ecommerce_order_id": 42,
+  "city": "Lahore",
+  "customer": { "name": "Jane Doe", "email": "jane@example.com", "phone": "+923001234567" },
+  "shipping_address": { "address1": "123 Main St", "city": "Lahore", "country": "PK" },
+  "line_items": [{ "title": "T-Shirt", "sku": "TS-01", "quantity": 2 }],
+  "cod_amount": "1500.00"
+}
+```
+
+Response **202**: `{ "shipment_id": <id>, "correlation_id": "<uuid>" }`.
+
+### Shopify, Quiqup, Celery, admin
+
+- **Shopify** — Admin → Logistics → Shopify stores (`shop_domain`, `access_token`, `webhook_secret`). Webhook URL: `https://YOUR_DOMAIN/api/v1/logistics/webhooks/shopify/orders-create/`. HMAC via `X-Shopify-Hmac-Sha256`; unknown/inactive stores → **403**.
+- **Quiqup** — Env: `REDIS_URL`, `QUIQUP_BASE_URL`, `QUIQUP_CLIENT_ID`, `QUIQUP_CLIENT_SECRET`, `LOGISTICS_QUIQUP_POLL_MINUTES`. Webhook: `POST .../webhooks/quiqup/`; optional `quiqup_webhook_secret` in Fulfillment configuration.
+- **Celery** — `celery -A settings worker -l info -Q logistics --concurrency=4` plus beat with `django_celery_beat`. Tasks: `process_shipment_pipeline`, `process_shopify_order_webhook`, `process_custom_order`, `sync_tracking_updates`, `poll_quiqup_tracking_batch`.
+- **Admin models** — Shopify stores, city fulfillment rules, courier configurations, fulfillment configuration (singleton: auto-fulfill, tracking sync, ingest token, Quiqup webhook secret).
+- **Local seed** — From Django project root: `DJANGO_USE_SQLITE=1 ./venv/bin/python manage.py seed_logistics`.
+
+Detailed backend docs (when present on the API repo): `docs/logistics/overview.md`, `shopify-webhooks.md`, `quiqup-integration.md`, `django-admin-setup.md`, `celery-workers.md`, `env-reference.md`, `seed-data.md`.
+
+---
+
 ## AI assistant prompt (copy-paste)
 
 Use the block below in Cursor or another AI tool when generating a client, tests, or UI against this backend.
 
 ```text
-You are integrating with a Django REST Framework ecommerce catalog API.
+You are integrating with a Django REST Framework ecommerce API and optional logistics service.
 
 Base URL: {ORIGIN}/api/v1/
+Logistics prefix: {ORIGIN}/api/v1/logistics/
+
+Catalog (public reads): collections, products, variants, options, option-values, tags.
+Commerce: checkouts, checkout-line-items, orders; Stripe at /stripe/config/, /stripe/session/{id}/confirm/, POST /checkouts/{id}/payment-session/.
+Logistics: POST /logistics/webhooks/shopify/orders-create/, /logistics/webhooks/quiqup/, /logistics/orders/ingest/ (Bearer ingest_api_token).
+
+React storefront (this repo): /checkout, /checkout/success, /checkout/cancel, /orders/:id. Stripe return uses session_id query param; COD uses POST /checkouts/{id}/complete/. New ecommerce.Order triggers logistics process_custom_order.
 
 Facts:
-- JSON request/response; Content-Type application/json for writes.
-- OpenAPI schema at GET /api/schema/, Swagger UI at GET /api/docs/.
-- Endpoints: collections, products, variants, options, option-values, tags (all under /api/v1/).
-- Standard DRF router: list/create on collection URL; retrieve/update/delete on /api/v1/{resource}/{id}/.
-- Products GET returns nested collection, tags, variants (with option_values), options (with values), plus read-only min_price and max_price.
-- Product serializer makes collection, tags, variants, and options read-only nested fields—do not assume PATCH /products/ can set collection or tags; use variant/option/option-value endpoints with FKs for structured writes.
-- Permissions are currently open (AllowAny); no JWT required unless the server is changed.
-- Images: fields are URLs in JSON; storage may be Cloudinary; multipart upload may require server parser support.
+- JSON request/response; OpenAPI at GET /api/schema/, Swagger at GET /api/docs/.
+- Products GET: nested collection, tags, variants, options; collection/tags not writable on product serializer—use FK endpoints.
+- Checkout: patch address/shipping; payment via Stripe redirect or COD complete; fulfillment on orders via nested fulfillments[].
+- Permissions: catalog AllowAny unless changed; auth for customer profile/orders as implemented on server.
 
-Generate code that uses relative paths under /api/v1/, handles pagination if enabled later, and validates HTTP status codes. For field names and types, prefer mirroring the OpenAPI schema from /api/schema/.
+Prefer OpenAPI for field-level detail. Validate HTTP status (401 ingest token, 403 Shopify store, 202 ingest accepted).
 ```
 
 Replace `{ORIGIN}` with `http://localhost:8000` or your production host.

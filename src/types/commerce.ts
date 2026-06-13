@@ -27,6 +27,15 @@ export interface CheckoutLineItem {
   product_title?: string
 }
 
+export interface CheckoutTotals {
+  subtotal?: string
+  discount_amount?: string
+  shipping_total?: string
+  tax_total?: string
+  gift_card_total?: string
+  total: string
+}
+
 export interface Checkout {
   id: number
   token: string
@@ -45,7 +54,9 @@ export interface Checkout {
   discount_amount?: string
   line_items?: CheckoutLineItem[]
   gift_card_applications?: CheckoutGiftCardApplication[]
-  totals?: string | unknown
+  totals?: CheckoutTotals | string | unknown
+  payment_required?: boolean
+  stripe_enabled?: boolean
   created_at?: string
   updated_at?: string
 }

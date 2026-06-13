@@ -4,6 +4,8 @@ import ProductDetail from './components/ProductDetail'
 import Cart from './components/Cart'
 import UserProfile from './components/UserProfile'
 import Checkout from './components/Checkout'
+import CheckoutSuccess from './pages/CheckoutSuccess'
+import CheckoutCancel from './pages/CheckoutCancel'
 import OrderDetail from './components/OrderDetail'
 import Footer from './components/Footer'
 import LoginPage from './pages/LoginPage'
@@ -29,6 +31,8 @@ function App() {
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout/success" element={<CheckoutSuccess />} />
+          <Route path="/checkout/cancel" element={<CheckoutCancel />} />
           <Route path="/account/*" element={<UserProfile />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

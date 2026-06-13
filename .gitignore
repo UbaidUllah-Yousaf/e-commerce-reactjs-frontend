@@ -20,6 +20,11 @@ dist-ssr
 # Cursor
 .cursor/
 
+# Python virtual environments
+.venv-jira/
+.venv/
+venv/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
